@@ -1,7 +1,7 @@
 {
   "name": "@simon/metabase-server",
   "version": "0.1.0",
-  "description": "A Model Context Protocol server for Metabase",
+  "description": "MCP server for interacting with Metabase - provides AI assistants with tools to query, create, and manage dashboards, cards, and databases",
   "private": false,
   "type": "module",
   "bin": {
@@ -11,13 +11,14 @@
     "build"
   ],
   "scripts": {
-    "build": "tsc && node -e \"require('fs').chmodSync('build/index.js', '755')\" && mkdir -p dist && cp build/index.js dist/index.js",
+    "build": "tsc && node -e \"require('fs').chmodSync('build/index.js', '755')\" && mkdir -p dist && cp build/*.js dist/",
+    "test": "npm run build && node --test test/**/*.test.js",
     "prepare": "npm run build",
     "watch": "tsc --watch",
     "inspector": "npx @modelcontextprotocol/inspector build/index.js"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^0.6.1",
+    "@modelcontextprotocol/sdk": "^1.25.2",
     "abort-controller": "^3.0.0",
     "axios": "^1.14.0"
   },
