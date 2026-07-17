@@ -20,14 +20,19 @@ interface LoggedResponse {
 }
 
 /**
- * Log full response to .last-response.json
- * This allows inspection of the complete JSON data while returning concise markdown
+ * Log full response to .last-response.json, for local inspection/debugging.
+ * Off by default since requests/responses can contain sensitive data (e.g.
+ * raw SQL text, query results) — set METABASE_MCP_LOG_RESPONSES=true to enable.
  */
 export async function logResponse(
   toolName: string,
   requestParams: any,
   responseData: any
 ): Promise<void> {
+  if (process.env.METABASE_MCP_LOG_RESPONSES !== 'true') {
+    return;
+  }
+
   try {
     const logEntry: LoggedResponse = {
       timestamp: new Date().toISOString(),

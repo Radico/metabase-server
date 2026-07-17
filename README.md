@@ -88,6 +88,8 @@ To use with Claude Desktop, add the server config:
 On MacOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
 On Windows: `%APPDATA%/Claude/claude_desktop_config.json`
 
+API Key authentication is preferred; username/password is used as a fallback if `METABASE_API_KEY` is not set.
+
 ```json
 {
   "mcpServers": {
@@ -95,11 +97,7 @@ On Windows: `%APPDATA%/Claude/claude_desktop_config.json`
       "command": "metabase-server",
       "env": {
         "METABASE_URL": "https://your-metabase-instance.com",
-        // Use API Key (preferred)
         "METABASE_API_KEY": "your_metabase_api_key"
-        // Or Username/Password (if API Key is not set)
-        // "METABASE_USERNAME": "your_username",
-        // "METABASE_PASSWORD": "your_password"
       }
     }
   }

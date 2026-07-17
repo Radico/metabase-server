@@ -283,7 +283,7 @@ export function formatGenericResponse(operation: string, data: any, baseUrl?: st
     if (data.created_at) output += `- **Created**: ${new Date(data.created_at).toISOString()}\n`;
     if (data.updated_at) output += `- **Updated**: ${new Date(data.updated_at).toISOString()}\n`;
 
-    output += "\n*Full JSON response saved to `.mcp-servers/metabase/.last-response.json`*\n";
+    output += "\n*Full JSON response saved to `.last-response.json` in the server's install directory (if response logging is enabled)*\n";
   } else {
     output += "Operation completed successfully.\n";
   }

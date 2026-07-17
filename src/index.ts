@@ -877,8 +877,15 @@ class MetabaseServer {
           }
 
           case "list_cards": {
-            const f = request.params?.arguments?.f || "all";
-            const response = await this.axiosInstance.get(`/api/card?f=${f}`);
+            const VALID_CARD_FILTERS = ["archived", "table", "database", "using_model", "bookmarked", "using_segment", "all", "mine"];
+            const f = String(request.params?.arguments?.f || "all");
+            if (!VALID_CARD_FILTERS.includes(f)) {
+              throw new McpError(
+                ErrorCode.InvalidParams,
+                `Invalid filter "${f}". Must be one of: ${VALID_CARD_FILTERS.join(", ")}`
+              );
+            }
+            const response = await this.axiosInstance.get(`/api/card?f=${encodeURIComponent(f)}`);
             await logResponse('list_cards', request.params?.arguments, response.data);
             return {
               content: [{
@@ -926,13 +933,19 @@ class MetabaseServer {
             }
 
             const rawParameters = request.params?.arguments?.parameters;
-            const parameters = Array.isArray(rawParameters)
-              ? rawParameters
-              : rawParameters && typeof rawParameters === "object" && Object.keys(rawParameters).length === 0
-                ? []
-                : rawParameters
-                  ? [rawParameters]
-                  : [];
+            let parameters: any[];
+            if (rawParameters === undefined || rawParameters === null) {
+              parameters = [];
+            } else if (Array.isArray(rawParameters)) {
+              parameters = rawParameters;
+            } else if (typeof rawParameters === "object" && Object.keys(rawParameters).length === 0) {
+              parameters = [];
+            } else {
+              throw new McpError(
+                ErrorCode.InvalidParams,
+                "parameters must be an array of parameter objects"
+              );
+            }
             const maxRows = typeof request.params?.arguments?.max_rows === 'number'
               ? request.params.arguments.max_rows
               : 50;
@@ -1193,7 +1206,11 @@ class MetabaseServer {
             // Must use PUT /dashboard/:id with dashcards array. Negative ID = new card.
             // First get existing dashboard to preserve existing cards
             const dashboardResponse = await this.axiosInstance.get(`/api/dashboard/${dashboard_id}`);
-            const existingDashcards = dashboardResponse.data.dashcards || [];
+            const existingDashcards =
+              dashboardResponse.data?.ordered_cards ??
+              dashboardResponse.data?.dashcards ??
+              dashboardResponse.data?.cards ??
+              [];
             const dashTabs = dashboardResponse.data.tabs || [];
 
             // Resolve tab ID: use provided value, or auto-select first tab for tabbed dashboards
@@ -1595,7 +1612,11 @@ class MetabaseServer {
             // Since Metabase 0.47+, DELETE endpoint was removed.
             // Must use PUT with dashcards array, omitting the card to delete.
             const dashboardResponse = await this.axiosInstance.get(`/api/dashboard/${dashboard_id}`);
-            const existingDashcards = dashboardResponse.data.dashcards || [];
+            const existingDashcards =
+              dashboardResponse.data?.ordered_cards ??
+              dashboardResponse.data?.dashcards ??
+              dashboardResponse.data?.cards ??
+              [];
             const dashTabs = dashboardResponse.data.tabs || [];
             const filteredDashcards = existingDashcards.filter((dc: any) => dc.id !== dashcard_id);
 
